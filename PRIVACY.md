@@ -34,4 +34,4 @@ Markdown Benez does not use external analytics, advertising, tracking, or teleme
 
 For questions about this privacy policy, open an issue in the project repository:
 
-https://github.com/marcelobenez/markdown-editor
+https://github.com/workhard-digital/markdown-benez
