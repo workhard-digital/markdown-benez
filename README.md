@@ -1,6 +1,6 @@
-# Markdown Benez
+# Editor Markdown Online
 
-Markdown Benez is a browser extension that copies selected web content, links, and images as Markdown. It also includes a built-in Markdown editor so copied content can be edited before being saved or reused.
+Editor Markdown Online is a browser extension that copies selected web content, links, and images as Markdown. It also includes a built-in Markdown editor so copied content can be edited before being saved or reused.
 
 ## Features
 
@@ -16,7 +16,7 @@ Markdown Benez is a browser extension that copies selected web content, links, a
 
 ## Permissions
 
-Markdown Benez requests the following browser permissions:
+Editor Markdown Online requests the following browser permissions:
 
 - `contextMenus`: adds copy and edit actions to the browser context menu.
 - `activeTab`: reads the current tab selection when the user explicitly triggers the extension.
@@ -66,4 +66,4 @@ See [PRIVACY.md](PRIVACY.md).
 
 ## License
 
-Markdown Benez is licensed under the [MIT License](LICENSE).
+Editor Markdown Online is licensed under the [MIT License](LICENSE).

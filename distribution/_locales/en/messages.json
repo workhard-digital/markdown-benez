@@ -1,5 +1,5 @@
 {
-  "extName": {"message": "Markdown Benez"},
+  "extName": {"message": "Markdown Online Editor"},
   "extDescription": {"message": "Copy web content as Markdown and edit it in a built-in editor."},
   "actionOpenEditorTitle": {"message": "Open Markdown editor"},
   "commandCopySelectionDesc": {"message": "Copy selection as Markdown"},
@@ -9,7 +9,7 @@
   "menuEditLink": {"message": "Edit link as Markdown"},
   "menuCopySelection": {"message": "Copy selection as Markdown"},
   "menuEditSelection": {"message": "Edit selection as Markdown"},
-  "editorPageTitle": {"message": "Markdown Benez"},
+  "editorPageTitle": {"message": "Markdown Online Editor"},
   "editorInitialDocument": {"message": "# New Document"},
   "editorSaveAs": {"message": "Save As"},
   "editorSaveAsMarkdown": {"message": "Markdown"},

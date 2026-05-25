@@ -40,7 +40,7 @@ function t(key, fallback) {
 
 function loadI18nStrings() {
     i18nStrings = {
-        editorTitle: t('editorPageTitle', 'Markdown Benez'),
+        editorTitle: t('editorPageTitle', 'Editor Markdown Online'),
         initialDocument: t('editorInitialDocument', '# New Document'),
         fileApiUnsupported: t('alertFileApiUnsupported', 'The File APIs are not fully supported in this browser.'),
         beforeUnloadMessage: t('beforeUnloadMessage', 'It looks like you have been editing something. If you leave before saving, your changes will be lost.'),
