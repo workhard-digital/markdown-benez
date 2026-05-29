@@ -28,6 +28,8 @@ var extensionDraftStorageKey = 'copyAsMarkdownDraft';
 var themeStorageKey = 'editorTheme';
 var i18nApi = (typeof browser !== 'undefined' && browser.i18n) ? browser.i18n : ((typeof chrome !== 'undefined' && chrome.i18n) ? chrome.i18n : null);
 var i18nStrings = {};
+var suppressNextEditorChange = false;
+var editorHasUserChanges = false;
 
 function t(key, fallback) {
     if (!i18nApi || typeof i18nApi.getMessage !== 'function') {
@@ -119,6 +121,19 @@ function getQueryParam(name) {
     return new URLSearchParams(window.location.search).get(name);
 }
 
+function loadEditorValue(value) {
+    suppressNextEditorChange = true;
+    try {
+        editor.setValue(value);
+    } finally {
+        suppressNextEditorChange = false;
+    }
+}
+
+function markEditorChangedByUser() {
+    editorHasUserChanges = true;
+}
+
 async function loadExtensionDraftFromStorage() {
     if (getQueryParam('source') !== 'extension-draft') {
         return false;
@@ -144,7 +159,7 @@ async function loadExtensionDraftFromStorage() {
             return false;
         }
 
-        editor.setValue(draft);
+        loadEditorValue(draft);
 
         if (typeof browser !== 'undefined') {
             await extensionApi.storage.local.remove(extensionDraftStorageKey);
@@ -231,7 +246,13 @@ var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
     }
 });
 
-editor.on('change', update);
+editor.on('change', function(cm, change) {
+    update(cm);
+
+    if (!suppressNextEditorChange && change.origin !== 'setValue') {
+        markEditorChangedByUser();
+    }
+});
 
 function selectionChanger(selection,operator,endoperator){
     if(!endoperator){
@@ -394,6 +415,7 @@ document.addEventListener('drop', function(e) {
     var reader = new FileReader();
     reader.onload = function(e) {
         editor.setValue(e.target.result);
+        markEditorChangedByUser();
     };
 
     reader.readAsText(e.dataTransfer.files[0]);
@@ -549,6 +571,7 @@ function openFile(evt) {
         reader.onload = function(file) {
             console.log(file.target.result);
             editor.setValue(file.target.result);
+            markEditorChangedByUser();
             return true;
         };
         reader.readAsText(files[0]);
@@ -588,10 +611,12 @@ document.addEventListener('keydown', function(e) {
 
 function clearEditor() {
     editor.setValue("");
+    markEditorChangedByUser();
 }
 
 function saveInBrowser() {
     localStorage.setItem('content', editor.getValue());
+    editorHasUserChanges = false;
 }
 
 function toggleNightMode(button) {
@@ -641,7 +666,7 @@ async function start() {
             setOutput(decodeURIComponent(escape(RawDeflate.inflate(atob(h.slice(5))))));
             document.body.className = 'view';
         } else {
-            editor.setValue(
+            loadEditorValue(
                 decodeURIComponent(escape(
                     RawDeflate.inflate(
                         atob(
@@ -654,11 +679,11 @@ async function start() {
     } else if (await loadExtensionDraftFromStorage()) {
         // Content loaded from extension storage
     } else if (localStorage.getItem('content')) {
-        editor.setValue(localStorage.getItem('content'));
+        loadEditorValue(localStorage.getItem('content'));
     }
 
     if (editor.getValue() === '# New Document') {
-        editor.setValue(i18nStrings.initialDocument);
+        loadEditorValue(i18nStrings.initialDocument);
     }
 
     update(editor);
@@ -667,7 +692,7 @@ async function start() {
 }
 
 window.addEventListener("beforeunload", function (e) {
-    if (!editor.getValue() || editor.getValue() == localStorage.getItem('content')) {
+    if (!editorHasUserChanges || !editor.getValue() || editor.getValue() == localStorage.getItem('content')) {
         return;
     }
     var confirmationMessage = i18nStrings.beforeUnloadMessage;

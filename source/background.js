@@ -4,6 +4,7 @@ if (typeof browser === 'undefined') {
 
 const contexts = ['image', 'link', 'selection'];
 const actions = ['copy', 'edit'];
+const pageAction = 'page-to-editor';
 const editorDraftStorageKey = 'copyAsMarkdownDraft';
 
 function getMessage(key, substitutions, fallback = '') {
@@ -26,6 +27,37 @@ async function openEditorTab(loadDraft = false) {
 	});
 }
 
+function canMessageTab(tab) {
+	if (!tab || !tab.id || typeof tab.url !== 'string') {
+		return false;
+	}
+
+	try {
+		const url = new URL(tab.url);
+		return url.protocol === 'http:' || url.protocol === 'https:';
+	} catch (_) {
+		return false;
+	}
+}
+
+function isMissingReceiverError(error) {
+	return error && typeof error.message === 'string' && error.message.includes('Receiving end does not exist');
+}
+
+async function sendContentMessage(tab, message) {
+	if (!canMessageTab(tab)) {
+		return;
+	}
+
+	try {
+		await browser.tabs.sendMessage(tab.id, message);
+	} catch (error) {
+		if (!isMissingReceiverError(error)) {
+			console.error(error);
+		}
+	}
+}
+
 async function createContextMenus() {
 	await browser.contextMenus.removeAll();
 	for (const context of contexts) {
@@ -38,6 +70,12 @@ async function createContextMenus() {
 			});
 		}
 	}
+
+	browser.contextMenus.create({
+		id: `cpy-as-md:${pageAction}:page`,
+		title: getMessage('menuPageToEditor', undefined, 'Convert page to Markdown in editor'),
+		contexts: ['all']
+	});
 }
 
 browser.runtime.onInstalled.addListener(() => {
@@ -69,15 +107,15 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 		htmlContent = `<a href="${linkUrl}">${text || linkUrl}</a>`;
 	}
 
-	try {
-		await browser.tabs.sendMessage(tab.id, {
-			actionType,
-			htmlContent,
-			mode
-		});
-	} catch (error) {
-		console.error(error);
+	if (mode === pageAction) {
+		actionType = 'page';
 	}
+
+	await sendContentMessage(tab, {
+		actionType,
+		htmlContent,
+		mode: mode === pageAction ? 'edit' : mode
+	});
 });
 
 browser.action.onClicked.addListener(async () => {
@@ -96,7 +134,7 @@ browser.commands.onCommand.addListener(async command => {
 				return;
 			}
 
-			await browser.tabs.sendMessage(tabs[0].id, {
+			await sendContentMessage(tabs[0], {
 				actionType: 'selection',
 				htmlContent: '',
 				mode: 'copy'

@@ -1,6 +1,6 @@
 {
   "extName": {"message": "Markdown Online Editor"},
-  "extDescription": {"message": "Copy web content as Markdown and edit it in a built-in editor."},
+  "extDescription": {"message": "Copy selected content or full web pages as Markdown and edit them in a built-in editor."},
   "actionOpenEditorTitle": {"message": "Open Markdown editor"},
   "commandCopySelectionDesc": {"message": "Copy selection as Markdown"},
   "menuCopyImage": {"message": "Copy image as Markdown"},
@@ -9,6 +9,7 @@
   "menuEditLink": {"message": "Edit link as Markdown"},
   "menuCopySelection": {"message": "Copy selection as Markdown"},
   "menuEditSelection": {"message": "Edit selection as Markdown"},
+  "menuPageToEditor": {"message": "Convert full page to Markdown in editor"},
   "editorPageTitle": {"message": "Markdown Online Editor"},
   "editorInitialDocument": {"message": "# New Document"},
   "editorSaveAs": {"message": "Save As"},
