@@ -49,6 +49,26 @@ turndownService.addRule('mathml', {
 	}
 });
 
+function absolutizeUrls(wrapper) {
+	wrapper.querySelectorAll('a').forEach(link => link.setAttribute('href', link.href));
+	wrapper.querySelectorAll('img, source, video, audio, iframe').forEach(node => {
+		const source = node.getAttribute('src');
+		if (source) {
+			node.setAttribute('src', new URL(source, document.baseURI).href);
+		}
+	});
+}
+
+function removeTableFloaters(wrapper) {
+	const tables = wrapper.querySelectorAll('table');
+	for (const table of tables) {
+		const floaters = Array.from(table.children).filter(node => !['THEAD', 'TBODY', 'TR', 'TFOOT'].includes(node.tagName));
+		for (const floater of floaters) {
+			floater.remove();
+		}
+	}
+}
+
 function getSelectionAsHTML() {
 	const selection = document.getSelection();
 	let containerTagName = '';
@@ -72,15 +92,8 @@ function getSelectionAsHTML() {
 	const wrapper = document.createElement('div');
 	wrapper.append(fragment);
 
-	wrapper.querySelectorAll('a').forEach(link => link.setAttribute('href', link.href));
-
-	const tables = wrapper.querySelectorAll('table');
-	for (const table of tables) {
-		const floaters = Array.from(table.children).filter(node => !['THEAD', 'TBODY', 'TR', 'TFOOT'].includes(node.tagName));
-		for (const floater of floaters) {
-			floater.remove();
-		}
-	}
+	absolutizeUrls(wrapper);
+	removeTableFloaters(wrapper);
 
 	if (containerTagName === '') {
 		return wrapper.innerHTML;
@@ -99,6 +112,77 @@ function getSelectionAsHTML() {
 	return '<' + containerTagName + '>' + wrapper.innerHTML + '</' + containerTagName + '>';
 }
 
+function getIframeContent(iframe) {
+	try {
+		const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
+		if (!iframeDocument || !iframeDocument.body) {
+			return '';
+		}
+
+		const iframeClone = iframeDocument.body.cloneNode(true);
+		iframeClone.querySelectorAll('script, style, nav, footer, aside, .ads, .comments').forEach(element => element.remove());
+		absolutizeUrls(iframeClone);
+		removeTableFloaters(iframeClone);
+
+		return `<div class="iframe-content">${iframeClone.innerHTML}</div>`;
+	} catch (_) {
+		return '';
+	}
+}
+
+function getPageAsHTML() {
+	if (!document || !document.body) {
+		return '';
+	}
+
+	const bodyClone = document.body.cloneNode(true);
+	const iframeContents = Array.from(document.querySelectorAll('iframe'))
+		.map(iframe => getIframeContent(iframe))
+		.filter(Boolean);
+
+	bodyClone.querySelectorAll([
+		'script',
+		'style',
+		'noscript',
+		'nav',
+		'footer',
+		'aside',
+		'.ads',
+		'.comments',
+		'[role="complementary"]',
+		'.cookie-banner',
+		'.popup',
+		'.overlay',
+		'.modal'
+	].join(', ')).forEach(element => element.remove());
+
+	absolutizeUrls(bodyClone);
+	removeTableFloaters(bodyClone);
+
+	const mainSelectors = ['main', 'article', '.content', '.post', '.entry', '[role="main"]', '#content', '.main'];
+	let mainContent = null;
+	for (const selector of mainSelectors) {
+		const found = bodyClone.querySelector(selector);
+		if (found && found.innerHTML.trim().length > 100) {
+			mainContent = found;
+			break;
+		}
+	}
+
+	let content = mainContent ? mainContent.innerHTML : bodyClone.innerHTML;
+	if (iframeContents.length > 0) {
+		content += '<h2>Embedded Content</h2>' + iframeContents.join('<hr>');
+	}
+
+	const title = document.title || 'Untitled Page';
+	return `
+		<div class="markdown-content">
+			<h1>${title}</h1>
+			${content}
+		</div>
+	`;
+}
+
 browser.runtime.onMessage.addListener(async message => {
 	if (message.actionType === '') {
 		return;
@@ -107,10 +191,12 @@ browser.runtime.onMessage.addListener(async message => {
 	let htmlContent = message.htmlContent;
 	if (message.actionType === 'selection') {
 		htmlContent = getSelectionAsHTML();
+	} else if (message.actionType === 'page') {
+		htmlContent = getPageAsHTML();
 	}
 
 	try {
-		const markdownContent = turndownService.turndown(htmlContent);
+		const markdownContent = turndownService.turndown(htmlContent).replace(/\n{3,}/g, '\n\n').trim();
 		if (message.mode !== 'edit') {
 			await navigator.clipboard.writeText(markdownContent);
 			return;

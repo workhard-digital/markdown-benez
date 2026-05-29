@@ -5,7 +5,7 @@
 
   **Copy web content as Markdown and refine it in a clean, built-in editor.**
 
-  [![Version](https://img.shields.io/badge/version-1.0.1-0f766e)](source/manifest.json)
+  [![Version](https://img.shields.io/badge/version-1.0.2-0f766e)](source/manifest.json)
   [![License: MIT](https://img.shields.io/badge/license-MIT-f1c40f)](LICENSE)
   [![Privacy](https://img.shields.io/badge/privacy-local--first-16a34a)](PRIVACY.md)
 
@@ -19,7 +19,7 @@
 
 ---
 
-Editor Markdown Online is a browser extension for turning selected content, links, and images from any web page into reusable Markdown. Copy the generated Markdown directly to your clipboard, or send it to the integrated editor to adjust formatting, preview the result, and save a document.
+Editor Markdown Online is a browser extension for turning selected content, links, images, and full web pages into reusable Markdown. Copy generated Markdown directly to your clipboard, or send it to the integrated editor to adjust formatting, preview the result, and save a document.
 
 <div align="center">
   <img src="media/screenshot.png" alt="Editor Markdown Online editor with Markdown preview" width="100%">
@@ -28,6 +28,7 @@ Editor Markdown Online is a browser extension for turning selected content, link
 ## Features
 
 - Copy a text selection, link, or image as Markdown from the browser context menu.
+- Convert the full current page to Markdown and open it directly in the built-in editor.
 - Edit captured Markdown in a split-view editor with live preview.
 - Create a new Markdown document by clicking the extension icon.
 - Format headings, emphasis, lists, tasks, quotes, links, images, code, and tables from the toolbar.
@@ -50,8 +51,8 @@ Editor Markdown Online is a browser extension for turning selected content, link
 
 | Permission | Purpose |
 | --- | --- |
-| `contextMenus` | Adds the copy and edit actions to the browser context menu. |
-| `activeTab` | Accesses selected content in the active page only when the user triggers an action. |
+| `contextMenus` | Adds the copy, edit, and full-page conversion actions to the browser context menu. |
+| `activeTab` | Accesses selected content or the current page only when the user triggers an action. |
 | `storage` | Stores temporary editor drafts and preferences such as the chosen theme. |
 
 The extension does not send copied content, documents, or browsing data to an external server. See the full [Privacy Policy](PRIVACY.md).
@@ -59,8 +60,8 @@ The extension does not send copied content, documents, or browsing data to an ex
 ## Install Locally
 
 ```sh
-git clone https://github.com/workhard-digital/markdown-benez.git
-cd markdown-benez
+git clone https://github.com/machinemaker-public/markdown-editor.git
+cd markdown-editor
 npm install
 npm run build
 ```

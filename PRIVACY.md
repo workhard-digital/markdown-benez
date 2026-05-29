@@ -11,12 +11,13 @@ Editor Markdown Online does not collect, sell, share, or transmit personal data 
 The extension may process the following data locally when the user triggers an action:
 
 - selected web page content
+- full web page content when the user chooses the full-page Markdown conversion
 - selected links
 - selected images
 - Markdown documents created or edited in the built-in editor
 - editor preferences, such as light or dark mode
 
-This data is processed only to provide the extension's copy, edit, preview, and save features.
+This data is processed only to provide the extension's copy, full-page conversion, edit, preview, and save features.
 
 ## Browser Storage
 
@@ -34,4 +35,4 @@ Editor Markdown Online does not use external analytics, advertising, tracking, o
 
 For questions about this privacy policy, open an issue in the project repository:
 
-https://github.com/workhard-digital/markdown-benez
+https://github.com/machinemaker-public/markdown-editor
